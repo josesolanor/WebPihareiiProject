@@ -34,7 +34,7 @@ namespace WebPihare
             });
 
             services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseMySql(
+                options.UseSqlServer(
                     Configuration.GetConnectionString("PihareConnection")));
 
             services.AddIdentity<IdentityUser, IdentityRole>()

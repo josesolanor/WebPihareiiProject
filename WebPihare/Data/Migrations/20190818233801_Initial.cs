@@ -4,24 +4,44 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace WebPihare.Data.Migrations
 {
-    public partial class initialPihare : Migration
+    public partial class Initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropIndex(
-                name: "UserNameIndex",
-                table: "AspNetUsers");
+            migrationBuilder.AlterColumn<string>(
+                name: "Name",
+                table: "AspNetUserTokens",
+                nullable: false,
+                oldClrType: typeof(string),
+                oldMaxLength: 128);
 
-            migrationBuilder.DropIndex(
-                name: "RoleNameIndex",
-                table: "AspNetRoles");
+            migrationBuilder.AlterColumn<string>(
+                name: "LoginProvider",
+                table: "AspNetUserTokens",
+                nullable: false,
+                oldClrType: typeof(string),
+                oldMaxLength: 128);
+
+            migrationBuilder.AlterColumn<string>(
+                name: "ProviderKey",
+                table: "AspNetUserLogins",
+                nullable: false,
+                oldClrType: typeof(string),
+                oldMaxLength: 128);
+
+            migrationBuilder.AlterColumn<string>(
+                name: "LoginProvider",
+                table: "AspNetUserLogins",
+                nullable: false,
+                oldClrType: typeof(string),
+                oldMaxLength: 128);
 
             migrationBuilder.CreateTable(
                 name: "Departmentstate",
                 columns: table => new
                 {
                     DepartmentStateId = table.Column<int>(nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     DepartmentStateValue = table.Column<string>(nullable: true),
                     DepartmentStateDescription = table.Column<string>(nullable: true)
                 },
@@ -35,7 +55,7 @@ namespace WebPihare.Data.Migrations
                 columns: table => new
                 {
                     DepartmentTypeId = table.Column<int>(nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     DepartmentTypeValue = table.Column<string>(nullable: true),
                     DepartmentTypeDescription = table.Column<string>(nullable: true)
                 },
@@ -49,7 +69,7 @@ namespace WebPihare.Data.Migrations
                 columns: table => new
                 {
                     RoleId = table.Column<int>(nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     RoleValue = table.Column<string>(nullable: true),
                     RoleDescription = table.Column<string>(nullable: true)
                 },
@@ -63,7 +83,7 @@ namespace WebPihare.Data.Migrations
                 columns: table => new
                 {
                     VisitStateId = table.Column<int>(nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     VisitStateValue = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
@@ -76,7 +96,7 @@ namespace WebPihare.Data.Migrations
                 columns: table => new
                 {
                     DepartmentId = table.Column<int>(nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     DepartmentCode = table.Column<int>(nullable: false),
                     NumberFloor = table.Column<int>(nullable: false),
                     NumberBedrooms = table.Column<int>(nullable: false),
@@ -107,7 +127,7 @@ namespace WebPihare.Data.Migrations
                 columns: table => new
                 {
                     CommisionerId = table.Column<int>(nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     FirstName = table.Column<string>(nullable: true),
                     LastName = table.Column<string>(nullable: true),
                     SecondLastName = table.Column<string>(nullable: true),
@@ -134,7 +154,7 @@ namespace WebPihare.Data.Migrations
                 columns: table => new
                 {
                     ClientId = table.Column<int>(nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     FirstName = table.Column<string>(nullable: true),
                     LastName = table.Column<string>(nullable: true),
                     SecondLastName = table.Column<string>(nullable: true),
@@ -159,7 +179,7 @@ namespace WebPihare.Data.Migrations
                 columns: table => new
                 {
                     VisitRegistrationId = table.Column<int>(nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     VisitDay = table.Column<DateTime>(nullable: true),
                     Observations = table.Column<string>(nullable: true),
                     ClientId = table.Column<int>(nullable: false),
@@ -196,18 +216,6 @@ namespace WebPihare.Data.Migrations
                         principalColumn: "VisitStateId",
                         onDelete: ReferentialAction.Restrict);
                 });
-
-            migrationBuilder.CreateIndex(
-                name: "UserNameIndex",
-                table: "AspNetUsers",
-                column: "NormalizedUserName",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "RoleNameIndex",
-                table: "AspNetRoles",
-                column: "NormalizedName",
-                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Client_CommisionerId",
@@ -276,27 +284,33 @@ namespace WebPihare.Data.Migrations
             migrationBuilder.DropTable(
                 name: "Role");
 
-            migrationBuilder.DropIndex(
-                name: "UserNameIndex",
-                table: "AspNetUsers");
+            migrationBuilder.AlterColumn<string>(
+                name: "Name",
+                table: "AspNetUserTokens",
+                maxLength: 128,
+                nullable: false,
+                oldClrType: typeof(string));
 
-            migrationBuilder.DropIndex(
-                name: "RoleNameIndex",
-                table: "AspNetRoles");
+            migrationBuilder.AlterColumn<string>(
+                name: "LoginProvider",
+                table: "AspNetUserTokens",
+                maxLength: 128,
+                nullable: false,
+                oldClrType: typeof(string));
 
-            migrationBuilder.CreateIndex(
-                name: "UserNameIndex",
-                table: "AspNetUsers",
-                column: "NormalizedUserName",
-                unique: true,
-                filter: "[NormalizedUserName] IS NOT NULL");
+            migrationBuilder.AlterColumn<string>(
+                name: "ProviderKey",
+                table: "AspNetUserLogins",
+                maxLength: 128,
+                nullable: false,
+                oldClrType: typeof(string));
 
-            migrationBuilder.CreateIndex(
-                name: "RoleNameIndex",
-                table: "AspNetRoles",
-                column: "NormalizedName",
-                unique: true,
-                filter: "[NormalizedName] IS NOT NULL");
+            migrationBuilder.AlterColumn<string>(
+                name: "LoginProvider",
+                table: "AspNetUserLogins",
+                maxLength: 128,
+                nullable: false,
+                oldClrType: typeof(string));
         }
     }
 }
