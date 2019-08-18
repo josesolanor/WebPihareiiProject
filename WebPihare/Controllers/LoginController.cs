@@ -38,31 +38,31 @@ namespace WebPihare.Controllers
         {
             if (ModelState.IsValid)
             {
-                model.Input.Password = _hash.EncryptString(model.Input.Password);
-                var login = _context.Commisioner.Where(m => m.Nic == model.Input.Username && m.CommisionerPassword == model.Input.Password).FirstOrDefault();
+                //model.Input.Password = _hash.EncryptString(model.Input.Password);
+                //var login = _context.Commisioner.Where(m => m.Nic == model.Input.Username && m.CommisionerPassword == model.Input.Password).FirstOrDefault();
 
-                if (login is null)
-                {
+                //if (login is null)
+                //{
                     
-                    model.ErrorMessage = "Credenciales Incorrectos";
-                    return View(model);
-                }
-                var RoleName = _context.Role.FirstOrDefault(m => m.RoleId == login.RoleId).RoleValue;
-                var claims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.Name, login.Nic),
-                    new Claim("FullName", $"{login.FirstName} {login.LastName} {login.SecondLastName}"),
-                    new Claim("Id", login.CommisionerId.ToString()),
-                    new Claim(ClaimTypes.Email, login.Email),
-                    new Claim(ClaimTypes.Role, RoleName)
-                };
+                //    model.ErrorMessage = "Credenciales Incorrectos";
+                //    return View(model);
+                //}
+                //var RoleName = _context.Role.FirstOrDefault(m => m.RoleId == login.RoleId).RoleValue;
+                //var claims = new List<Claim>
+                //{
+                //    new Claim(ClaimTypes.Name, login.Nic),
+                //    new Claim("FullName", $"{login.FirstName} {login.LastName} {login.SecondLastName}"),
+                //    new Claim("Id", login.CommisionerId.ToString()),
+                //    new Claim(ClaimTypes.Email, login.Email),
+                //    new Claim(ClaimTypes.Role, RoleName)
+                //};
 
-                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                var authProperties = new AuthenticationProperties
-                {
+                //var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                //var authProperties = new AuthenticationProperties
+                //{
 
-                };
-                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), authProperties);
+                //};
+                //await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), authProperties);
 
             }
             return RedirectToAction("Index", "Departments");
