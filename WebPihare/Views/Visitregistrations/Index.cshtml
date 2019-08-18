@@ -1,0 +1,218 @@
+﻿@model WebPihare.Models.AddVisitState
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h2>Index</h2>
+<h2>@TempData["ErrorMsg"]</h2>
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+
+<div class="demo-container">
+    <div id="gridContainer"></div>
+</div>
+
+<div id="StateModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Estado de la visita</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <form asp-action="AddState" method="post">
+                            <div class="col-xs-12">
+                                <div class="form-group">
+                                    <label asp-for="stateId" class="control-label">Seleccionar un estado</label>
+                                    <select asp-for="stateId" class="form-control" asp-items="ViewBag.VisitStateId"></select>
+                                </div>
+                            </div>
+                            <div class="col-xs-12">
+                                <div class="form-group">
+                                    <input type="submit" value="Comentar" class="btn btn-default" />
+                                </div>
+                            </div>
+                            <input asp-for="visitSeletedId" hidden value="0">
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $.ajax({
+        url: '@Url.Action("LoadGrid", "Visitregistrations")',
+        type: "GET"
+    }).done(function (response) {
+
+        var datasource = JSON.parse(response);
+
+        $(function(){
+            $("#gridContainer").dxDataGrid({
+                dataSource: datasource,
+                allowColumnReordering: true,
+                allowColumnResizing: true,
+                columnAutoWidth: true,
+                showColumnLines: true,
+                showRowLines: true,
+                rowAlternationEnabled: true,
+                showBorders: true,
+                columnChooser: {
+                enabled: true
+                },
+                filterRow: {
+                    visible: true,
+                },
+                filterPanel: { visible: true },
+                headerFilter: { visible: true },
+                paging: {
+                    pageSize: 10
+                },
+                pager: {
+                    showPageSizeSelector: true,
+                    allowedPageSizes: [10, 25, 50, 100]
+                },
+                selection: {
+                    mode: "single"
+                },
+                grouping: {
+                    autoExpandAll: true
+                },
+                headerFilter: {
+                    visible: true
+                },
+                groupPanel: {
+                    visible: true
+                },
+                "export": {
+                    enabled: true,
+                    fileName: "RegistroVisitas"+Date.now(),
+                    allowExportSelectedData: true
+                },
+                columns: [
+                    {
+                        dataField: "VisitRegistrationId",
+                        visible: false
+                    },
+                    {
+                        dataField: "ClientId",
+                        visible: false
+                    },
+                    {
+                        dataField: "DepartmentId",
+                        visible: false
+                    },
+                    {
+                        dataField: "CommisionerId",
+                        visible: false
+                    },
+
+                    {
+                        dataField: "VisitDay",
+                        caption: 'Fecha Visita'
+                    },
+                    {
+                        dataField: "DepartmentCode",
+                        caption: 'Codigo Departamento'
+                    },
+                    {
+                        dataField: "FullNameClient",
+                        caption: 'Nombre Cliente'
+                    },
+                    {
+                        dataField: "FullNameCommisioner",
+                        caption: 'Nombre Comisionista'
+                    },
+                    {
+                        dataField: "Observations",
+                        caption: 'Observaciones'
+                    },
+                    {
+                        dataField: "State",
+                        caption: 'Estado'
+                    },
+                    {
+                        dataField: "Acciones",
+                        caption: 'Acciones',
+                        cellTemplate: function (container, options) {
+                            var wrapper = $("<center>");
+                            var StateContainer = $("<div>");
+                            var DetailsContainer = $("<div>");
+                            var EditContainer = $("<div>");
+                            var DeleteContainer = $("<div>");
+
+                            container.append(wrapper.append(StateContainer));
+
+                            StateContainer.dxButton({
+                                hint: 'Cambiar Estado',
+                                type: "success",
+                                icon: 'glyphicon glyphicon-cog',
+                                width: 50,
+                                onClick: function () {
+
+                                    stateModal(options.data.VisitRegistrationId)
+                                }
+                            });
+
+                            container.append(wrapper.append(DetailsContainer));
+
+                            DetailsContainer.dxButton({
+                                hint: 'Detalles',
+                                type: "default",
+                                icon: 'glyphicon glyphicon-list',
+                                width: 50,
+                                onClick: function () {
+                                    var url = "@Url.Action("Details","VisitRegistrations")/" + options.data.VisitRegistrationId;
+                                    window.location.href = url;
+                                }
+                            });
+
+                            container.append(wrapper.append(EditContainer));
+
+                            EditContainer.dxButton({
+                                hint: 'Editar',
+                                type: 'default',
+                                icon: 'glyphicon glyphicon-pencil',
+                                width: 50,
+                                onClick: function () {
+                                    var url = "@Url.Action("Edit","VisitRegistrations")/" + options.data.VisitRegistrationId;
+                                    window.location.href = url;
+                                }
+                            });
+
+                            container.append(wrapper.append(DeleteContainer));
+
+                            DeleteContainer.dxButton({
+                                hint: 'Editar',
+                                type: 'danger',
+                                icon: 'glyphicon glyphicon-trash',
+                                width: 50,
+                                onClick: function () {                                    
+                                    var url = "@Url.Action("Delete","VisitRegistrations")/" + options.data.VisitRegistrationId;
+                                    window.location.href = url;
+                                }
+                            });
+
+                        }
+                    }
+                ]
+            });
+        });
+        
+    });
+</script>
+
+<script>
+
+    function stateModal(data) {
+        $("#StateModal").modal();
+        $("#visitSeletedId").val(data);
+    }
+
+</script>

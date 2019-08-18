@@ -1,0 +1,110 @@
+﻿@model IEnumerable<WebPihare.Entities.Visitregistration>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h2>Mis Visitas</h2>
+
+<div class="demo-container">
+    <div id="gridContainer"></div>
+</div>
+
+<script>
+    $.ajax({
+        url: '@Url.Action("MyLoadGrid", "Visitregistrations")',
+        type: "GET"
+    }).done(function (response) {
+
+        var datasource = JSON.parse(response);
+
+        $(function(){
+            $("#gridContainer").dxDataGrid({
+                dataSource: datasource,
+                allowColumnReordering: true,
+                allowColumnResizing: true,
+                columnAutoWidth: true,
+                showColumnLines: true,
+                showRowLines: true,
+                rowAlternationEnabled: true,
+                showBorders: true,
+                columnChooser: {
+                enabled: true
+                },
+                filterRow: {
+                    visible: true,
+                },
+                filterPanel: { visible: true },
+                headerFilter: { visible: true },
+                paging: {
+                    pageSize: 10
+                },
+                pager: {
+                    showPageSizeSelector: true,
+                    allowedPageSizes: [10, 25, 50, 100]
+                },
+                selection: {
+                    mode: "single"
+                },
+                grouping: {
+                    autoExpandAll: true
+                },
+                headerFilter: {
+                    visible: true
+                },
+                groupPanel: {
+                    visible: true
+                },
+                "export": {
+                    enabled: true,
+                    fileName: "RegistroVisitas"+Date.now(),
+                    allowExportSelectedData: true
+                },
+                columns: [
+                    {
+                        dataField: "VisitRegistrationId",
+                        visible: false
+                    },
+                    {
+                        dataField: "ClientId",
+                        visible: false
+                    },
+                    {
+                        dataField: "DepartmentId",
+                        visible: false
+                    },
+                    {
+                        dataField: "CommisionerId",
+                        visible: false
+                    },
+
+                    {
+                        dataField: "VisitDay",
+                        caption: 'Fecha Visita'
+                    },
+                    {
+                        dataField: "DepartmentCode",
+                        caption: 'Codigo Departamento'
+                    },
+                    {
+                        dataField: "FullNameClient",
+                        caption: 'Nombre Cliente'
+                    },
+                    {
+                        dataField: "FullNameCommisioner",
+                        caption: 'Nombre Comisionista'
+                    },
+                    {
+                        dataField: "Observations",
+                        caption: 'Observaciones'
+                    },
+                    {
+                        dataField: "State",
+                        caption: 'Estado'
+                    }
+                ]
+            });
+        });
+
+    });
+</script>
