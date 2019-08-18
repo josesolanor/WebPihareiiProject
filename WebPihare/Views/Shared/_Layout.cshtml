@@ -1,4 +1,10 @@
 ﻿@using Microsoft.AspNetCore.Identity
+
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+
+
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -59,12 +65,12 @@
                         }
                     }
                 </ul>
-                @if (User.Identity.IsAuthenticated)
+                @if (SignInManager.IsSignedIn(User))
                 {
                     <form asp-controller="Login" asp-action="Logout" method="post">
                         <ul class="nav navbar-nav navbar-right">
                             <li>
-                                <a asp-controller="Commisioners" asp-action="MyProfile">Hola @User.FindFirst("FullName").Value</a>
+                                <a asp-controller="Commisioners" asp-action="MyProfile">Hola @UserManager.GetUserName(User)</a>
                             </li>
                             <li>
                                 <button type="submit" class="btn btn-link navbar-btn navbar-link">Logout</button>

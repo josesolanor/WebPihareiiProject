@@ -7,9 +7,12 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using WebPihare.Core;
 using WebPihare.Data;
+using WebPihare.Library;
 using WebPihare.Models;
 
 namespace WebPihare.Controllers
@@ -20,11 +23,18 @@ namespace WebPihare.Controllers
 
         private readonly ApplicationDbContext _context;
         private readonly Hash _hash;
+        private LUsuarios _usuarios;
+        private ListObject listObject = new ListObject();
 
-        public LoginController(ApplicationDbContext context, Hash hash)
+        public LoginController(ApplicationDbContext context,
+            Hash hash, UserManager<IdentityUser> userManager,
+            SignInManager<IdentityUser> signInManager,
+            RoleManager<IdentityRole> roleManager)
         {
             _context = context;
             _hash = hash;
+            _usuarios = new LUsuarios(roleManager, signInManager, userManager);
+            listObject._singInManager = signInManager;
         }
         [AllowAnonymous]
         public ActionResult Index()
@@ -38,41 +48,32 @@ namespace WebPihare.Controllers
         {
             if (ModelState.IsValid)
             {
-                //model.Input.Password = _hash.EncryptString(model.Input.Password);
-                //var login = _context.Commisioner.Where(m => m.Nic == model.Input.Username && m.CommisionerPassword == model.Input.Password).FirstOrDefault();
+                var listObject = await _usuarios.userLogin(model.Input.Username, model.Input.Password);
+                var _identityError = (IdentityError)listObject[0];
 
-                //if (login is null)
-                //{
-                    
-                //    model.ErrorMessage = "Credenciales Incorrectos";
-                //    return View(model);
-                //}
-                //var RoleName = _context.Role.FirstOrDefault(m => m.RoleId == login.RoleId).RoleValue;
-                //var claims = new List<Claim>
-                //{
-                //    new Claim(ClaimTypes.Name, login.Nic),
-                //    new Claim("FullName", $"{login.FirstName} {login.LastName} {login.SecondLastName}"),
-                //    new Claim("Id", login.CommisionerId.ToString()),
-                //    new Claim(ClaimTypes.Email, login.Email),
-                //    new Claim(ClaimTypes.Role, RoleName)
-                //};
+                model.ErrorMessage = _identityError.Description;
 
-                //var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                //var authProperties = new AuthenticationProperties
-                //{
+                if (model.ErrorMessage.Equals("True"))
+                {
 
-                //};
-                //await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), authProperties);
+                    var data = JsonConvert.SerializeObject(listObject[1]);
+                    HttpContext.Session.SetString("User", data);
+                    return RedirectToAction("Index", "Departments");
+                }
+                else
+                {
+                    return View(model);
+                }
 
             }
-            return RedirectToAction("Index", "Departments");
+            return View(model);
         }
 
         [HttpPost]
         [AllowAnonymous]
         public async Task<IActionResult> Logout()
         {
-            await HttpContext.SignOutAsync();
+            await listObject._singInManager.SignOutAsync();
             return RedirectToAction("Index", "Login");
         }
 

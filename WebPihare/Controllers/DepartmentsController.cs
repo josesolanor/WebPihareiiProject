@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -23,9 +24,12 @@ namespace WebPihare.Controllers
             _context = context;
         }
 
-        [Authorize(Roles="Admin,Comisionista")]
+        [Authorize(Roles = "Admin,Comisionista")]
         public async Task<IActionResult> Index()
         {
+            var user = HttpContext.Session.GetString("User");
+            UserData dataItem = JsonConvert.DeserializeObject<UserData>(user.ToString());
+
             RegisterModalClientViewModal model = new RegisterModalClientViewModal
             {
                 Departments = await _context.Department.Include(d => d.DepartmentState).Include(d => d.DepartmentType).ToListAsync()

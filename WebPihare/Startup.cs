@@ -37,7 +37,7 @@ namespace WebPihare
                 options.UseMySql(
                     Configuration.GetConnectionString("PihareConnection")));
 
-            services.AddDefaultIdentity<IdentityUser>()
+            services.AddIdentity<IdentityUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2)
@@ -46,11 +46,25 @@ namespace WebPihare
                     options.Conventions.AddPageRoute("/Departments/Index", "");
                 });
 
+            services.ConfigureApplicationCookie(options => {
+                options.Cookie.HttpOnly = true;
+                options.ExpireTimeSpan = TimeSpan.FromDays(1);
+                options.LoginPath = "/Login/Index";
+                options.AccessDeniedPath = "/Login/Denied";
+            });
+
+            services.AddSession(options => {
+                options.Cookie.Name = "PihareSession";
+                options.IdleTimeout = TimeSpan.FromHours(12);
+            });
+
             services.AddScoped<Hash>();
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
+            app.UseSession();
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -72,7 +86,7 @@ namespace WebPihare
             {
                 routes.MapRoute(
                     name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
+                    template: "{controller=Login}/{action=Index}/{id?}");
             });
         }
     }
