@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -33,7 +34,10 @@ namespace WebPihare.Controllers
         [Authorize(Roles = "Comisionista")]
         public async Task<IActionResult> MyClients()
         {
-            var idUser = int.Parse(User.Claims.FirstOrDefault(m => m.Type == "Id").Value);
+            var user = HttpContext.Session.GetString("User");
+            UserData dataItem = JsonConvert.DeserializeObject<UserData>(user.ToString());
+            var idUser = dataItem.CommisionerId;
+
             return View(await _context.Client.Include(m => m.Commisioner).Where(m => m.CommisionerId == idUser).ToListAsync());
         }
 
@@ -68,7 +72,9 @@ namespace WebPihare.Controllers
         {
             if (ModelState.IsValid)
             {
-                var idUser = int.Parse(User.Claims.FirstOrDefault(m => m.Type == "Id").Value);
+                var user = HttpContext.Session.GetString("User");
+                UserData dataItem = JsonConvert.DeserializeObject<UserData>(user.ToString());
+                var idUser = dataItem.CommisionerId;
 
                 var Commisioner = _context.Commisioner.FirstOrDefault(m => m.CommisionerId == idUser);
 

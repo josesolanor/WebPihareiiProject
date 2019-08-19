@@ -73,7 +73,9 @@ namespace WebPihare.Controllers
 
             if (ModelState.IsValid)
             {
-                var idUser = int.Parse(User.Claims.FirstOrDefault(m => m.Type == "Id").Value);
+                var user = HttpContext.Session.GetString("User");
+                UserData dataItem = JsonConvert.DeserializeObject<UserData>(user.ToString());
+                var idUser = dataItem.CommisionerId;
 
                 var exist = _context.Client.FirstOrDefault(m => m.CI == data.Client.CI);
 

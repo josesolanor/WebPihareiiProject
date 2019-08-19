@@ -9,6 +9,11 @@ using Microsoft.EntityFrameworkCore;
 using WebPihare.Entities;
 using WebPihare.Core;
 using WebPihare.Data;
+using Microsoft.AspNetCore.Identity;
+using WebPihare.Library;
+using Microsoft.AspNetCore.Http;
+using WebPihare.Models;
+using Newtonsoft.Json;
 
 namespace WebPihare.Controllers
 {
@@ -17,11 +22,17 @@ namespace WebPihare.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly Hash _hash;
+        private LUsuarios _usuarios;
+        private ListObject listObject = new ListObject();
 
-        public CommisionersController(ApplicationDbContext context, Hash hash)
+        public CommisionersController(ApplicationDbContext context, Hash hash, UserManager<IdentityUser> userManager,
+            SignInManager<IdentityUser> signInManager,
+            RoleManager<IdentityRole> roleManager)
         {
             _context = context;
             _hash = hash;
+            _usuarios = new LUsuarios(roleManager, signInManager, userManager);
+            listObject._singInManager = signInManager;
         }
         
         public async Task<IActionResult> Index()
@@ -48,8 +59,10 @@ namespace WebPihare.Controllers
         }
 
         public async Task<IActionResult> MyProfile()
-        {
-            var id = int.Parse(User.Claims.FirstOrDefault(m => m.Type == "Id").Value);
+        {            
+            var user = HttpContext.Session.GetString("User");
+            UserData dataItem = JsonConvert.DeserializeObject<UserData>(user.ToString());
+            var id = dataItem.CommisionerId;
 
             if (id == 0)
             {
@@ -78,9 +91,27 @@ namespace WebPihare.Controllers
         {
             if (ModelState.IsValid)
             {
-                commisioner.CommisionerPassword = _hash.EncryptString(commisioner.CommisionerPassword);
-                _context.Add(commisioner);
-                await _context.SaveChangesAsync();
+                var commisionerUser = new IdentityUser {
+                    Email = commisioner.Email,
+                    UserName = commisioner.Nic                    
+                };
+
+                try
+                {
+                    commisioner.CommisionerPassword = _hash.EncryptString(commisioner.CommisionerPassword);
+                    _context.Add(commisioner);
+                    await _context.SaveChangesAsync();
+
+                    await _usuarios._userManager.CreateAsync(commisionerUser, commisioner.CommisionerPassword);
+                    var RoleName = _context.Role.FirstOrDefault(v => v.RoleId.Equals(commisioner.RoleId)).RoleValue;
+                    var addRoleToUser = await _usuarios._userManager.FindByEmailAsync(commisioner.Email);
+                    await _usuarios._userManager.AddToRoleAsync(addRoleToUser, RoleName);
+                }
+                catch (Exception)
+                {
+                    return View(commisioner);
+                }
+                                
                 return RedirectToAction(nameof(Index));
             }
             return View(commisioner);
@@ -115,8 +146,28 @@ namespace WebPihare.Controllers
             {
                 try
                 {
+
+                    if (string.IsNullOrEmpty(commisioner.CommisionerPassword) && string.IsNullOrWhiteSpace(commisioner.CommisionerPassword))
+                    {
+
+                        var dataCommisioner = _context.Commisioner.FirstOrDefault(v => v.CommisionerId.Equals(id));
+                        commisioner.CommisionerPassword = dataCommisioner.CommisionerPassword;
+                    }
+
+                    var user = HttpContext.Session.GetString("User");
+                    UserData dataItem = JsonConvert.DeserializeObject<UserData>(user.ToString());
+
+                    var userObtainedById = await _usuarios._userManager.FindByIdAsync(dataItem.Id);
+
+                    await _usuarios._userManager.ChangePasswordAsync(userObtainedById, userObtainedById.PasswordHash, commisioner.CommisionerPassword);
+
+                    userObtainedById.Email = commisioner.Email;
+                    userObtainedById.NormalizedEmail = commisioner.Email.ToUpper();
+
                     commisioner.CommisionerPassword = _hash.EncryptString(commisioner.CommisionerPassword);
                     _context.Update(commisioner);
+                    _context.Update(userObtainedById);
+                 
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)

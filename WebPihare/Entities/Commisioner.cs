@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 
 namespace WebPihare.Entities
 {
@@ -23,9 +24,11 @@ namespace WebPihare.Entities
         public string Nic { get; set; }
         [DisplayName("Numero de contrato")]
         public int ContractNumber { get; set; }
-        [DisplayName("Correo Electronico")]
         public string Email { get; set; }
         public int Telefono { get; set; }
+        [RegularExpression("^((?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])|(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[^a-zA-Z0-9])|(?=.*?[A-Z])(?=.*?[0-9])(?=.*?[^a-zA-Z0-9])|(?=.*?[a-z])(?=.*?[0-9])(?=.*?[^a-zA-Z0-9])).{8,50}$",
+                                ErrorMessage = "La password debe ser almenos de 8 caracteres y contener de 3 a 4 de los siguientes: Mayusculas, minusculas, numeros y caracteres especiales (e.g. !@#$%^&*)")]
+
         public string CommisionerPassword { get; set; }
         public int RoleId { get; set; }
         [DisplayName("Role")]

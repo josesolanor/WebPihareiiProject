@@ -26,28 +26,32 @@ namespace WebPihare.Library
             _usersRole = new UsersRoles();
         }
 
-        internal async Task <object[]> userLogin(string userName, string password)
+        internal async Task <object[]> userLogin(string email, string password, int commisionerid)
         {
             try
             {
-                var result = await _singInManager.PasswordSignInAsync(userName, password, false, lockoutOnFailure: false);
-                if (result.Succeeded)
+                var userObtainedByEmail = await _userManager.FindByEmailAsync(email);
+
+                if (userObtainedByEmail.Email.Equals(email))
                 {
-                    var user = _userManager.Users.Where(u => u.Email.Equals(userName)).ToList();
+                    await _singInManager.SignInAsync(userObtainedByEmail, false);
+
+                    var user = _userManager.Users.Where(u => u.Email.Equals(email)).ToList();
                     _userRoles = await _usersRole.getRole(_userManager, _roleManager, user[0].Id);
                     _userData = new UserData
                     {
                         Id = user[0].Id,
                         Role = _userRoles[0].Text,
-                        UserName = user[0].UserName
+                        UserName = user[0].UserName,
+                        CommisionerId = commisionerid,
                     };
                     code = "0";
-                    description = result.Succeeded.ToString();
+                    description = "True";
                 }
                 else
                 {
                     code = "1";
-                    description = "Correo o contraseña invalidas";
+                    description = "Usuario o contraseña invalidas";
                 }
             }
             catch (Exception ex)

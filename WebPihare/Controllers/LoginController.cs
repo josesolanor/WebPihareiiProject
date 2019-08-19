@@ -48,14 +48,23 @@ namespace WebPihare.Controllers
         {
             if (ModelState.IsValid)
             {
-                var listObject = await _usuarios.userLogin(model.Input.Username, model.Input.Password);
+                var encryptPassword = _hash.EncryptString(model.Input.Password);
+
+                var commisionerLogin = _context.Commisioner.FirstOrDefault(v => v.Nic.Equals(model.Input.Username) && v.CommisionerPassword.Equals(encryptPassword));
+
+                if (commisionerLogin is null)
+                {
+                    model.ErrorMessage = "Usuario o contraseña invalidas";
+                    return View(model);
+                }
+
+                var listObject = await _usuarios.userLogin(commisionerLogin.Email, model.Input.Password, commisionerLogin.CommisionerId);
                 var _identityError = (IdentityError)listObject[0];
 
                 model.ErrorMessage = _identityError.Description;
 
                 if (model.ErrorMessage.Equals("True"))
                 {
-
                     var data = JsonConvert.SerializeObject(listObject[1]);
                     HttpContext.Session.SetString("User", data);
                     return RedirectToAction("Index", "Departments");
